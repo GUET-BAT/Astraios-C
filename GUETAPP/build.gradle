@@ -1,0 +1,69 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+//    ext {
+//        // 集成本地SDK
+//        INTEGRATE_LOCAL_SDK = true
+//        // 使用的AGP的版本
+//        AGP_VERSION = '7.4.2'
+//        // 接入RFix定制的R8
+//        R8_VERSION = '2.2.71-RFix-2'
+//        // 接入RFix补丁组件
+//        RFIX_VERSION = '1.2.9'
+//        // 接入Kotlin
+//        kotlin_version = '2.1.0'
+//        kotlin_coroutines = "1.9.0"
+//
+//    }
+    repositories {
+        maven { url 'https://developer.huawei.com/repo/'}//推送华为 maven 仓库地址
+        maven { url 'https://developer.hihonor.com/repo/' }
+        maven {
+            url "https://mirrors.tencent.com/nexus/repository/maven-public/"
+        }
+        mavenCentral()
+        maven { url'https://maven.aliyun.com/repository/google'}
+        maven { url'https://maven.aliyun.com/repository/jcenter'}
+        maven { url'https://maven.aliyun.com/nexus/content/groups/public'}
+        flatDir {
+            dirs 'libs'   // aar目录
+        }
+        maven {
+            url = "https://cloudbase-3040266113-maven.pkg.coding.net/repository/start-third-party/maven"
+            credentials {
+                username "maven-1660201790146"
+                password "e09ac2771a6491af446dc4a653a205d57c944baf"
+            }
+            authentication{
+                basic(BasicAuthentication)
+            }
+        }
+        maven {
+            url = "https://cloudbase-3040266113-maven.pkg.coding.net/repository/start-phone-x51/maven"
+            credentials {
+                username "maven-1660201790146"
+                password "e09ac2771a6491af446dc4a653a205d57c944baf"
+            }
+            authentication{
+                basic(BasicAuthentication)
+            }
+        }
+
+        maven { url 'https://repo1.maven.org/maven2/' }
+    }
+
+//    dependencies {
+//        classpath 'com.huawei.agconnect:agcp:1.9.1.301'// 华为推送 gradle 插件依赖
+//        classpath "com.android.tools.build:gradle:$AGP_VERSION"
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//        classpath 'org.greenrobot:greendao-gradle-plugin:3.3.0' // 添加插件 更好支持GreenDao
+//        classpath "commons-codec:commons-codec:1.8"
+//
+//        // 添加该依赖是为了解决一个Android插件的强转异常：java.util.function.Supplier
+//        // https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools/issues/27
+//        //classpath 'com.google.guava:guava:27.1-jre'
+//    }
+}
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+}
