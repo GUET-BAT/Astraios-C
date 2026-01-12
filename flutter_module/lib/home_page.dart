@@ -13,6 +13,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // 禁用返回按钮，避免返回到原生后再复用错误路由
         title: const Text('主页'),
       ),
       body: Center(

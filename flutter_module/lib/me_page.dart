@@ -8,6 +8,7 @@ class MePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // 禁用返回按钮，避免返回后复用错误路由
         title: const Text('我的'),
       ),
       body: Center(
