@@ -18,23 +18,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.dart.DartExecutor;
 
-/**
- * Flutter Fragment包装类
- * 用于在原生Android应用中嵌入Flutter页面
- * 支持通过MethodChannel与Flutter进行双向通信
- * 
- * 使用说明：
- * 1. 需要在app/build.gradle中添加Flutter依赖：
- *    dependencies {
- *        implementation project(':flutter')
- *    }
- * 
- * 2. 需要在settings.gradle中配置Flutter模块：
- *    include ':flutter'
- *    project(':flutter').projectDir = new File('../flutter_module')
- * 
- * 3. 集成Flutter后，取消注释下面的代码，并注释掉占位视图相关代码
- */
+
 public class FlutterFragmentWrapper extends BaseFragment {
     
     private static final String TAG = "FlutterFragmentWrapper";
