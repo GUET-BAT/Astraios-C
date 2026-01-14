@@ -1,0 +1,59 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        maven { url 'https://developer.huawei.com/repo/'}//推送华为 maven 仓库地址
+        maven { url 'https://developer.hihonor.com/repo/' }
+        maven {
+            url "https://mirrors.tencent.com/nexus/repository/maven-public/"
+        }
+        mavenCentral()
+        maven { url'https://maven.aliyun.com/repository/google'}
+        maven { url'https://maven.aliyun.com/repository/jcenter'}
+        maven { url'https://maven.aliyun.com/nexus/content/groups/public'}
+        flatDir {
+            dirs 'libs'   // aar目录
+        }
+        maven {
+            url = "https://cloudbase-3040266113-maven.pkg.coding.net/repository/start-third-party/maven"
+            credentials {
+                username "maven-1660201790146"
+                password "e09ac2771a6491af446dc4a653a205d57c944baf"
+            }
+            authentication{
+                basic(BasicAuthentication)
+            }
+        }
+        maven {
+            url = "https://cloudbase-3040266113-maven.pkg.coding.net/repository/start-phone-x51/maven"
+            credentials {
+                username "maven-1660201790146"
+                password "e09ac2771a6491af446dc4a653a205d57c944baf"
+            }
+            authentication{
+                basic(BasicAuthentication)
+            }
+        }
+
+        maven { url 'https://repo1.maven.org/maven2/' }
+    }
+
+
+}
+
+
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+}
+
+// 确保所有模块都能访问Google/Maven Central以及Flutter官方仓库
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // Flutter依赖官方仓库
+        maven { url 'https://storage.googleapis.com/download.flutter.io' }
+        // 如需国内镜像，可取消注释
+        // maven { url 'https://storage.flutter-io.cn/download.flutter.io' }
+    }
+}
