@@ -5,10 +5,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.guetapp.fragment.ChatFragment;
-import com.example.guetapp.fragment.HomeFragment;
-import com.example.guetapp.fragment.MeFragment;
-import com.example.guetapp.fragment.VideoFragment;
+import com.example.guetapp.component.main.fragment.HomeFragment;
+import com.example.guetapp.component.video.fragment.VideoFragment;
+import com.example.guetapp.component.social.fragment.ChatFragment;
+import com.example.guetapp.component.me.fragment.MeFragment;
 
 /**
  * 主页面ViewPager适配器

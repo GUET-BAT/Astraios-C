@@ -11,15 +11,38 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GUETAPP">
+        <!-- 启动页Activity -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".component.splash.activity.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.GUETAPP">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- 登录/注册相关 -->
+        <activity
+            android:name=".component.login.activity.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".component.login.activity.PhoneLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".component.login.activity.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".component.login.activity.QQLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".component.login.activity.WeChatLoginActivity"
+            android:exported="false" />
+        
+        <!-- 主页面Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
