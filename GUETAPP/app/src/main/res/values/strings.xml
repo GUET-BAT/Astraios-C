@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">GUETAPP</string>
+
+    <!-- Login -->
+    <string name="login_title">登录</string>
+    <string name="login_account_hint">账号</string>
+    <string name="login_password_hint">密码</string>
+    <string name="login_account_btn">账号密码登录</string>
+    <string name="login_phone_btn">手机号登录</string>
+    <string name="login_register_btn">注册</string>
+    <string name="login_qq_btn">QQ登录</string>
+    <string name="login_wechat_btn">微信登录</string>
+    <string name="login_guest_btn">游客模式</string>
+
+    <string name="phone_login_title">手机号登录</string>
+    <string name="register_title">注册</string>
+    <string name="register_account_hint">账号/手机号</string>
+    <string name="register_password_hint">密码</string>
+    <string name="register_submit_btn">注册</string>
+    <string name="qq_login_title">QQ登录</string>
+    <string name="wechat_login_title">微信登录</string>
+
+    <string name="placeholder_only_navigation">占位页面：仅实现跳转逻辑（具体功能暂不实现）</string>
+    <string name="btn_done_enter_home">完成并进入主页</string>
+    <string name="btn_simulate_login_enter_home">模拟登录并进入主页</string>
+    <string name="btn_back">返回</string>
 </resources>
