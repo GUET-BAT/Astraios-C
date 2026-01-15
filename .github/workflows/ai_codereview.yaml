@@ -3,20 +3,19 @@ name: AI Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    paths-ignore:
-      - '**/*.png'
-      - '**/*.jpg'
-      - '**/*.jpeg'
-      - '**/*.gif'
-      - '**/*.svg'
-      - '**/*.ico'
-      - '**/*.webp'
-      - '**/*.bmp'
-      - '**/*.zip'
-      - '**/*.rar'
-      - '**/*.pdf'
-      - '**/*.md'
-      - '**/README.md'
+    # ✅ 核心修复：只保留paths白名单，完美规避语法冲突，精准匹配你的业务代码
+    # 只对Java/Flutter/Kotlin/gradle/maven/yaml等代码文件触发评审，其他文件全部忽略
+    paths:
+      - '**/*.java'
+      - '**/*.dart'
+      - '**/*.kt'
+      - '**/*.gradle'
+      - '**/*.properties'
+      - '**/*.xml'
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/pubspec.yaml'
+      - '**/pubspec.lock'
 
 jobs:
   ai-review:
@@ -63,8 +62,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr diff ${{ github.event.pull_request.number }} --no-color --base main --head ${{ github.head_ref }} > diff.patch
-          echo "✅ Diff file generated, size: $(wc -c < diff.patch) bytes"
+          # ✅ 已修复：gh cli手动认证（Action必备）
+          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+          # ✅ 已修复：使用正确的分支变量+动态base分支，无语法错误
+          gh pr diff ${{ github.event.pull_request.number }} --no-color \
+            --base "${{ github.event.pull_request.base.ref }}" \
+            --head "${{ github.event.pull_request.head.ref }}" > diff.patch
+          echo "✅ Diff file generated successfully"
+          echo "Diff file size: $(wc -c < diff.patch) bytes"
 
       - name: Check if diff.patch is empty
         run: |
@@ -82,3 +87,4 @@ jobs:
           GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           timeout 600 python scripts/ai_codereview.py diff.patch || (echo "❌ AI review timeout, please retry later" && exit 1)
+
