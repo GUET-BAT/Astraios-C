@@ -3,15 +3,6 @@ name: AI Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    paths:
-      - '**/*.java'
-      - '**/*.dart'
-      - '**/*.kt'
-      - '**/*.gradle'
-      - '**/*.properties'
-      - '**/*.xml'
-      - '**/*.yaml'
-      - '**/*.yml'
     paths-ignore:
       - '**/*.png'
       - '**/*.jpg'
