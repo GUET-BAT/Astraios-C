@@ -1,0 +1,52 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+// Flutter Module标准集成方式（使用绝对路径，避免在Gradle daemon目录下解析相对路径）
+def flutterModuleRoot = new File(settingsDir, "../flutter_module").canonicalFile
+def includeFlutterScript = new File(flutterModuleRoot, ".android/include_flutter.groovy")
+
+if (includeFlutterScript.exists()) {
+    // 使用Flutter Module提供的标准集成脚本
+    setBinding(new Binding([gradle: this, settingsDir: settingsDir]))
+    evaluate(includeFlutterScript)
+} else {
+    // 备用方案：手动配置Flutter
+    def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+    def properties = new Properties()
+    
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        
+        if (flutterSdkPath != null) {
+            apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+            include ':flutter'
+            project(':flutter').projectDir = new File(flutterModuleRoot, ".android/Flutter")
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    // 使用PREFER_PROJECT允许Flutter插件在项目级别添加仓库
+    // Flutter插件会自动添加Flutter SDK的本地Maven仓库
+    // PREFER_PROJECT模式优先使用项目级别的仓库配置，适合Flutter混合开发
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "GUETAPP"
+include ':app'
