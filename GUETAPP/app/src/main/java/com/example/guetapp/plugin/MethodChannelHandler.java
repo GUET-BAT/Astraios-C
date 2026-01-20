@@ -34,6 +34,7 @@ public class MethodChannelHandler implements MethodChannel.MethodCallHandler {
     public static final String METHOD_NAVIGATE_TO_PAGE = "navigateToPage";
     public static final String METHOD_GET_USER_DATA = "getUserData";
     public static final String METHOD_CALL_NATIVE_FUNCTION = "callNativeFunction";
+    public static final String METHOD_LOGIN_STATE_CHANGED = "loginStateChanged";
     
     public MethodChannelHandler(Activity activity, FlutterEngine flutterEngine) {
         this.activity = activity;
@@ -76,6 +77,10 @@ public class MethodChannelHandler implements MethodChannel.MethodCallHandler {
                 
             case METHOD_CALL_NATIVE_FUNCTION:
                 handleCallNativeFunction(call, result);
+                break;
+
+            case METHOD_LOGIN_STATE_CHANGED:
+                handleLoginStateChanged(call, result);
                 break;
                 
             default:
@@ -140,12 +145,22 @@ public class MethodChannelHandler implements MethodChannel.MethodCallHandler {
      * 获取用户数据（示例）
      */
     private void handleGetUserData(MethodCall call, MethodChannel.Result result) {
-        // 这里可以从SharedPreferences、数据库等获取用户数据
         Map<String, Object> userData = new HashMap<>();
-        userData.put("userId", "12345");
-        userData.put("userName", "Flutter User");
-        userData.put("isLoggedIn", true);
-        
+        try {
+            android.content.Context ctx = activity != null ? activity.getApplicationContext() : null;
+            if (ctx != null) {
+                boolean isLoggedIn = com.example.guetapp.manager.SessionManager.isLoggedIn(ctx);
+                boolean isGuest = com.example.guetapp.manager.SessionManager.isGuest(ctx);
+                String userName = com.example.guetapp.manager.SessionManager.getUserName(ctx);
+                String access = com.example.guetapp.manager.SessionManager.getAccessToken(ctx);
+                userData.put("isLoggedIn", isLoggedIn);
+                userData.put("isGuest", isGuest);
+                userData.put("userName", userName);
+                userData.put("accessToken", access);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "getUserData error: " + e.getMessage());
+        }
         result.success(userData);
     }
     
@@ -176,11 +191,50 @@ public class MethodChannelHandler implements MethodChannel.MethodCallHandler {
                 // 获取电池电量（示例）
                 result.success(50); // 实际应该从系统获取
                 break;
+            case "logout":
+                handleLogout(result);
+                break;
                 
             default:
                 result.error("UNKNOWN_FUNCTION", "Unknown function: " + functionName, null);
                 break;
         }
+    }
+
+    /** Flutter侧通知登录状态变化（登录成功） */
+    private void handleLoginStateChanged(MethodCall call, MethodChannel.Result result) {
+        if (activity == null) {
+            result.error("ACTIVITY_NULL", "Activity is null", null);
+            return;
+        }
+        Map<String, Object> args = call.arguments instanceof Map ? (Map<String, Object>) call.arguments : null;
+        if (args == null) {
+            result.error("INVALID_ARGUMENT", "arguments is null", null);
+            return;
+        }
+        String access = safeString(args.get("accessToken"));
+        String refresh = safeString(args.get("refreshToken"));
+        String userName = safeString(args.get("userName"));
+        com.example.guetapp.manager.SessionManager.setTokens(activity, access, refresh, userName);
+        result.success(true);
+    }
+
+    /** 退出登录：清理会话并回到登录页 */
+    private void handleLogout(MethodChannel.Result result) {
+        if (activity == null) {
+            result.error("ACTIVITY_NULL", "Activity is null", null);
+            return;
+        }
+        com.example.guetapp.manager.SessionManager.logout(activity);
+        Intent intent = new Intent(activity, com.example.guetapp.component.login.activity.LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activity.startActivity(intent);
+        activity.finish();
+        result.success(true);
+    }
+
+    private String safeString(Object o) {
+        return o == null ? "" : String.valueOf(o);
     }
     
     /**
