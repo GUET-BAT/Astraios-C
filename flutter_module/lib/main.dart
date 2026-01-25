@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'home_view.dart';
 import 'me_view.dart';
-import 'services/native_channel_service.dart';
+import 'services/shared_channel.dart';
 
 /// 提前注册 MethodChannel，保证原生调用 flutterLogin 时已就绪
 void main() {
@@ -39,53 +37,7 @@ class MyApp extends StatelessWidget {
 
 }
 
+/// 注册MethodChannel，处理原生调用Flutter登录/注册/HTTP等
 void _registerMethodChannel() {
-  const channel = MethodChannel('com.example.guetapp/native');
-  channel.setMethodCallHandler((call) async {
-    print('收到Native调用：method=${call.method}, arguments=${call.arguments}');
-    switch (call.method) {
-    case 'flutterLogin':
-      final args = Map<String, dynamic>.from(call.arguments as Map);
-      final userName = args['userName'] as String? ?? '';
-      final passWord = args['passWord'] as String? ?? '';
-      Map<String, dynamic> res = {
-      "username": "ycj",
-      "status": 200,
-      "accessToken": "",
-      "refreshToken": ""
-      };
-      // await NativeChannelService.callNativeFunction(
-      // 'loginStateChanged',
-      // params: {
-      // 'accessToken': res['accessToken'] ?? '',
-      // 'refreshToken': res['refreshToken'] ?? '',
-      // 'userName': res['userName'] ?? userName,
-      // },);
-      return res;
-      // try {
-      //   final res = await UserRepository.instance.login(
-      //     userName: userName,
-      //     passWord: passWord,
-      //     type: 1,
-      //   );
-      //   // 通知原生登录态
-      //   await NativeChannelService.callNativeFunction(
-      //     'loginStateChanged',
-      //     params: {
-      //       'accessToken': res['accessToken'] ?? '',
-      //       'refreshToken': res['refreshToken'] ?? '',
-      //       'userName': res['userName'] ?? userName,
-      //     },
-      //   );
-      //   return res;
-      // } catch (e) {
-      //   return {
-      //     'status': 500,
-      //     'msg': 'login failed: $e',
-      //   };
-      // }
-      default:
-        return null;
-    }
-  });
+  SharedChannel.instance.setup();
 }

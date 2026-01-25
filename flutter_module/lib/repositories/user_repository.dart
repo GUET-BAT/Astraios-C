@@ -1,30 +1,31 @@
 import '../model/user_info_model.dart';
+import '../model/login_model.dart';
 import '../network/http_unit.dart';
 
 /// 用户相关数据仓库（Repo）
 ///
-/// 负责组织参数、调用底层 `HttpUnit`，并将返回数据转换成领域模型 `UserInfoModel`。
+/// 负责组织参数、调用底层 `HttpUnit`，并将返回数据转换成领域模型。
 /// MeView 等上层页面只依赖这个仓库，不关心具体网络实现。
 class UserRepository {
   UserRepository._internal();
 
   static final UserRepository instance = UserRepository._internal();
 
-  /// 登录接口，返回后端原样数据
-  Future<Map<String, dynamic>> login({
+  /// 登录接口，返回 LoginModel
+  Future<LoginModel> login({
     required String userName,
     required String passWord,
     int type = 1,
   }) async {
     final res = await HttpUnit.shared.post(
-      path: '/login',
+      path: '/login/',
       body: {
         'userName': userName,
         'passWord': passWord,
         'type': type,
       },
     );
-    return res;
+    return LoginModel.fromJson(res);
   }
 
   /// 根据用户 id 获取用户主页信息

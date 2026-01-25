@@ -195,6 +195,10 @@ public class MethodChannelHandler implements MethodChannel.MethodCallHandler {
                 handleLogout(result);
                 break;
                 
+            case "navigateToLogin":
+                handleNavigateToLogin(result);
+                break;
+                
             default:
                 result.error("UNKNOWN_FUNCTION", "Unknown function: " + functionName, null);
                 break;
@@ -226,6 +230,19 @@ public class MethodChannelHandler implements MethodChannel.MethodCallHandler {
             return;
         }
         com.example.guetapp.manager.SessionManager.logout(activity);
+        Intent intent = new Intent(activity, com.example.guetapp.component.login.activity.LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activity.startActivity(intent);
+        activity.finish();
+        result.success(true);
+    }
+
+    /** 跳转到登录页（游客状态） */
+    private void handleNavigateToLogin(MethodChannel.Result result) {
+        if (activity == null) {
+            result.error("ACTIVITY_NULL", "Activity is null", null);
+            return;
+        }
         Intent intent = new Intent(activity, com.example.guetapp.component.login.activity.LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activity.startActivity(intent);
