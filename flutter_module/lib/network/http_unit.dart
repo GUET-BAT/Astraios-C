@@ -8,12 +8,7 @@ import 'log_interceptor.dart';
 class HttpUnit {
   HttpUnit._internal() {
     _dio = Dio(BaseOptions(
-      baseUrl: 'https://static.g-oss.top',
-      // connectTimeout: const Duration(seconds: 10),
-      // receiveTimeout: const Duration(seconds: 10),
-      // sendTimeout: const Duration(seconds: 10),
-      // contentType: 'application/json; charset=UTF-8',
-      // responseType: ResponseType.json,
+      baseUrl: 'https://astraios.g-oss.top/api',
     ));
 
     // 添加日志拦截器

@@ -43,16 +43,6 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   }
 
   Future<void> _loadUserInfo() async {
-    if (!mounted) return;
-    
-    // 防抖：避免在短时间内重复刷新
-    final now = DateTime.now();
-    if (_lastRefreshTime != null && 
-        now.difference(_lastRefreshTime!) < _refreshCooldown) {
-      return;
-    }
-    _lastRefreshTime = now;
-    
     final data = await NativeChannelService.getUserData();
     final bool isGuest = data['isGuest'] == true;
     final String userName = (data['userName'] as String?) ?? '';

@@ -14,8 +14,6 @@ class _MeViewState extends State<MeView> with WidgetsBindingObserver {
   late final MeViewModel _viewModel = MeViewModel();
   bool _isGuest = false;
   String? _sessionUserName;
-  DateTime? _lastRefreshTime;
-  static const Duration _refreshCooldown = Duration(milliseconds: 500);
 
   @override
   void initState() {
@@ -47,16 +45,6 @@ class _MeViewState extends State<MeView> with WidgetsBindingObserver {
   }
 
   Future<void> _loadSession() async {
-    if (!mounted) return;
-    
-    // 防抖：避免在短时间内重复刷新
-    final now = DateTime.now();
-    if (_lastRefreshTime != null && 
-        now.difference(_lastRefreshTime!) < _refreshCooldown) {
-      return;
-    }
-    _lastRefreshTime = now;
-    
     final data = await NativeChannelService.getUserData();
     final bool isGuest = data['isGuest'] == true;
     final String name = (data['userName'] as String?) ?? '';

@@ -50,63 +50,87 @@ class SharedChannel {
   /// 登录：调用 UserRepository 发起网络请求，返回登录结果
   /// 原生通过返回值判断登录状态并更新 SessionManager
   Future<Map<String, dynamic>> _handleFlutterLogin(MethodCall call) async {
-    // try {
-    //   final args = Map<String, dynamic>.from(call.arguments as Map);
-    //   final userName = args['userName'] as String? ?? '';
-    //   final passWord = args['passWord'] as String? ?? '';
-    //
-    //   // 调用 UserRepository 发起登录请求
-    //   final loginModel = await UserRepository.instance.login(
-    //     userName: userName,
-    //     passWord: passWord,
-    //     type: 1,
-    //   );
-    //
-    //   // 返回登录结果（原生根据 status、accessToken、refreshToken、userName 判断登录状态）
-    //   return {
-    //     'status': loginModel.isSuccess ? 200 : loginModel.code,
-    //     'msg': loginModel.msg,
-    //     'accessToken': loginModel.data?.accessToken ?? '',
-    //     'refreshToken': loginModel.data?.refreshToken ?? '',
-    //     'userName': userName,
-    //   };
-    // } catch (e) {
-    //   // 异常时返回错误信息
-    //   return {
-    //     'status': 500,
-    //     'msg': '登录失败: $e',
-    //     'accessToken': '',
-    //     'refreshToken': '',
-    //     'userName': '',
-    //   };
-    // }
+    try {
+      final args = Map<String, dynamic>.from(call.arguments as Map);
+      final userName = args['userName'] as String? ?? '';
+      final passWord = args['passWord'] as String? ?? '';
 
-    return {
-      'status':  200,
-      'msg': "success",
-      'accessToken':  '111',
-      'refreshToken':  '222',
-      'userName': 'ycj',
-    };
-  }
+      // 调用 UserRepository 发起登录请求
+      final loginModel = await UserRepository.instance.login(
+        userName: userName,
+        passWord: passWord,
+        type: 1,
+      );
 
-  /// 注册：直接返回成功（可在此扩展真实逻辑）
-  Future<Map<String, dynamic>> _handleFlutterRegister(MethodCall call) async {
-    final args = Map<String, dynamic>.from(call.arguments as Map);
-    final userName = args['userName'] as String? ?? '';
-    final passWord = args['passWord'] as String? ?? '';
-    // 简单校验：非空即成功
-    if (userName.isEmpty || passWord.isEmpty) {
+      // 返回登录结果（原生根据 status、accessToken、refreshToken、userName 判断登录状态）
       return {
-        'status': 400,
-        'msg': 'userName or passWord empty',
+        'status': loginModel.isSuccess ? 200 : loginModel.code,
+        'msg': loginModel.msg,
+        'accessToken': loginModel.data?.accessToken ?? '',
+        'refreshToken': loginModel.data?.refreshToken ?? '',
+        'userName': userName,
+      };
+    } catch (e) {
+      // 异常时返回错误信息
+      return {
+        'status': 500,
+        'msg': '登录失败: $e',
+        'accessToken': '',
+        'refreshToken': '',
+        'userName': '',
       };
     }
-    return {
-      'status': 200,
-      'msg': 'success',
-      'userName': userName,
-    };
+
+  }
+
+  /// 注册：调用 UserRepository 发起网络请求，返回注册结果
+  /// 只返回bool值给原生，true表示注册成功，false表示注册失败
+  Future<bool> _handleFlutterRegister(MethodCall call) async {
+    print('═══════════════════════════════════════════════════════════');
+    print('🔵 注册流程开始');
+    print('═══════════════════════════════════════════════════════════');
+    try {
+      print('📝 步骤1: 解析参数');
+      final args = Map<String, dynamic>.from(call.arguments as Map);
+      final username = args['userName'] as String? ?? '';
+      final password = args['passWord'] as String? ?? '';
+      print('   用户名: $username');
+      print('   密码: ${password.isNotEmpty ? '***' : '(空)'}');
+
+      print('📝 步骤2: 准备调用 UserRepository.register()');
+      // 调用 UserRepository 发起注册请求
+      final result = await UserRepository.instance.register(
+        username: username,
+        password: password,
+      );
+      print('📝 步骤3: UserRepository.register() 调用完成');
+
+      print('═══════════════════════════════════════════════════════════');
+      print('📥 注册请求返回结果:');
+      print('═══════════════════════════════════════════════════════════');
+      print('   返回数据: $result');
+
+      // 检查注册结果
+      final code = result['code'] as int?;
+      final msg = result['msg'] as String? ?? '';
+
+      print('   解析结果:');
+      print('   code: $code');
+      print('   msg: $msg');
+
+      // 判断是否注册成功：code == 0 且 msg == "success"
+      final isSuccess = code == 0 && msg == 'success';
+      print('   注册${isSuccess ? "成功" : "失败"}');
+      print('═══════════════════════════════════════════════════════════');
+      
+      return isSuccess;
+    } catch (e) {
+      // 异常时返回false
+      print('═══════════════════════════════════════════════════════════');
+      print('❌ 注册异常: $e');
+      print('═══════════════════════════════════════════════════════════');
+      return false;
+    }
   }
 }
 

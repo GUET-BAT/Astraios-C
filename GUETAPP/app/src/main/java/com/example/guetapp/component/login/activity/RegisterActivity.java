@@ -11,9 +11,15 @@ import com.example.guetapp.R;
 import com.example.guetapp.activity.BaseActivity;
 import com.example.guetapp.manager.SessionManager;
 
+import java.util.HashMap;
+
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.MethodChannel;
+
 /**
  * 注册页：账号/手机号 + 密码 + 注册按钮
- * 注册成功后返回登录页（真实注册逻辑后续再接入）
+ * 通过Flutter发起网络请求进行注册
  */
 public class RegisterActivity extends BaseActivity {
 
@@ -22,10 +28,15 @@ public class RegisterActivity extends BaseActivity {
     private EditText etAccount;
     private EditText etPassword;
 
+    // Flutter临时Engine用于调用Flutter注册
+    private FlutterEngine registerFlutterEngine;
+    private MethodChannel registerChannel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        initFlutterEngineForRegister();
     }
 
     @Override
@@ -49,20 +60,72 @@ public class RegisterActivity extends BaseActivity {
                 return;
             }
 
-            // TODO：以后在这里接入真实“注册成功/失败”的判断逻辑
-            boolean registerSuccess = true;
+            // 调用Flutter侧的注册逻辑
+            doFlutterRegister(account, password);
+        });
+    }
 
-            if (registerSuccess) {
-                // 注册成功后回到登录页，不自动登录
-                SessionManager.logout(this);
-                Intent intent = new Intent(this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(this, "注册失败，请稍后重试", Toast.LENGTH_SHORT).show();
+    /**
+     * 初始化用于注册调用的FlutterEngine和MethodChannel
+     */
+    private void initFlutterEngineForRegister() {
+        registerFlutterEngine = new FlutterEngine(getApplicationContext());
+        // 执行默认dart入口
+        registerFlutterEngine.getDartExecutor().executeDartEntrypoint(
+                DartExecutor.DartEntrypoint.createDefault()
+        );
+        registerChannel = new MethodChannel(registerFlutterEngine.getDartExecutor().getBinaryMessenger(),
+                "com.example.guetapp/native");
+    }
+
+    /**
+     * 调用Flutter侧的注册逻辑
+     */
+    private void doFlutterRegister(String userName, String passWord) {
+        if (registerChannel == null) {
+            Toast.makeText(this, "Flutter通道未初始化", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("userName", userName);
+        args.put("passWord", passWord);
+        registerChannel.invokeMethod("flutterRegister", args, new MethodChannel.Result() {
+            @Override
+            public void success(Object result) {
+                // Flutter返回bool值，true表示注册成功
+                boolean registerSuccess = result instanceof Boolean ? (Boolean) result : false;
+                
+                if (registerSuccess) {
+                    // 注册成功后回到登录页，不自动登录
+                    SessionManager.logout(RegisterActivity.this);
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(RegisterActivity.this, "注册失败，请稍后重试", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void error(String errorCode, String errorMessage, Object errorDetails) {
+                Toast.makeText(RegisterActivity.this, "注册异常: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void notImplemented() {
+                Toast.makeText(RegisterActivity.this, "Flutter未实现注册方法", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (registerFlutterEngine != null) {
+            registerFlutterEngine.destroy();
+            registerFlutterEngine = null;
+        }
+        super.onDestroy();
     }
 }
 
