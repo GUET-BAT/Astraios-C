@@ -14,6 +14,9 @@ public final class SessionManager {
 
     private static final String KEY_LOGGED_IN = "logged_in";
     private static final String KEY_GUEST = "guest";
+    private static final String KEY_ACCESS_TOKEN = "access_token";
+    private static final String KEY_REFRESH_TOKEN = "refresh_token";
+    private static final String KEY_USER_NAME = "user_name";
 
     private SessionManager() {}
 
@@ -57,7 +60,33 @@ public final class SessionManager {
         sp(context).edit()
                 .putBoolean(KEY_LOGGED_IN, false)
                 .putBoolean(KEY_GUEST, false)
+                .remove(KEY_ACCESS_TOKEN)
+                .remove(KEY_REFRESH_TOKEN)
+                .remove(KEY_USER_NAME)
                 .apply();
+    }
+
+    /** 设置登录凭证与用户名 */
+    public static void setTokens(Context context, String accessToken, String refreshToken, String userName) {
+        sp(context).edit()
+                .putBoolean(KEY_LOGGED_IN, true)
+                .putBoolean(KEY_GUEST, false)
+                .putString(KEY_ACCESS_TOKEN, accessToken)
+                .putString(KEY_REFRESH_TOKEN, refreshToken)
+                .putString(KEY_USER_NAME, userName)
+                .apply();
+    }
+
+    public static String getAccessToken(Context context) {
+        return sp(context).getString(KEY_ACCESS_TOKEN, "");
+    }
+
+    public static String getRefreshToken(Context context) {
+        return sp(context).getString(KEY_REFRESH_TOKEN, "");
+    }
+
+    public static String getUserName(Context context) {
+        return sp(context).getString(KEY_USER_NAME, "");
     }
 }
 

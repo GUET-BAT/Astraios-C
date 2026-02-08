@@ -11,6 +11,13 @@ import com.example.guetapp.MainActivity;
 import com.example.guetapp.R;
 import com.example.guetapp.activity.BaseActivity;
 import com.example.guetapp.manager.SessionManager;
+import com.example.guetapp.plugin.MethodChannelHandler;
+
+import java.util.HashMap;
+
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.MethodChannel;
 
 /**
  * 登录页（账号密码登录 + 各入口跳转）
@@ -27,10 +34,15 @@ public class LoginActivity extends BaseActivity {
     private Button btnWechatLogin;
     private Button btnGuest;
 
+    // Flutter临时Engine用于调用Flutter登录
+    private FlutterEngine loginFlutterEngine;
+    private MethodChannel loginChannel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        initFlutterEngineForLogin();
     }
 
     @Override
@@ -57,9 +69,7 @@ public class LoginActivity extends BaseActivity {
                 return;
             }
 
-            // 这里不做真实鉴权，仅模拟“登录成功”
-            SessionManager.setLoggedIn(this, true);
-            goMainAndClearBackStack();
+            doFlutterLogin(account, password);
         });
 
         btnPhoneLogin.setOnClickListener(v ->
@@ -89,6 +99,72 @@ public class LoginActivity extends BaseActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * 初始化用于登录调用的FlutterEngine和MethodChannel
+     */
+    private void initFlutterEngineForLogin() {
+        loginFlutterEngine = new FlutterEngine(getApplicationContext());
+        // 执行默认dart入口
+        loginFlutterEngine.getDartExecutor().executeDartEntrypoint(
+                DartExecutor.DartEntrypoint.createDefault()
+        );
+        loginChannel = new MethodChannel(loginFlutterEngine.getDartExecutor().getBinaryMessenger(),
+                "com.example.guetapp/native");
+    }
+
+    /**
+     * 调用Flutter侧的登录逻辑
+     */
+    private void doFlutterLogin(String userName, String passWord) {
+        if (loginChannel == null) {
+            Toast.makeText(this, "Flutter通道未初始化", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("userName", userName);
+        args.put("passWord", passWord);
+        loginChannel.invokeMethod("flutterLogin", args, new MethodChannel.Result() {
+            @Override
+            public void success(Object result) {
+                if (result instanceof HashMap) {
+                    HashMap<?, ?> map = (HashMap<?, ?>) result;
+                    Object statusObj = map.get("status");
+                    int status = statusObj instanceof Number ? ((Number) statusObj).intValue() : 0;
+                    if (status == 200) {
+                        String access = String.valueOf(map.get("accessToken"));
+                        String refresh = String.valueOf(map.get("refreshToken"));
+                        String userName = String.valueOf(map.get("userName"));
+                        SessionManager.setTokens(LoginActivity.this, access, refresh, userName);
+                        goMainAndClearBackStack();
+                        return;
+                    }
+                    Toast.makeText(LoginActivity.this, "登录失败:" + map.get("msg"), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginActivity.this, "登录失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void error(String errorCode, String errorMessage, Object errorDetails) {
+                Toast.makeText(LoginActivity.this, "登录异常:" + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void notImplemented() {
+                Toast.makeText(LoginActivity.this, "Flutter未实现登录方法", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (loginFlutterEngine != null) {
+            loginFlutterEngine.destroy();
+            loginFlutterEngine = null;
+        }
+        super.onDestroy();
     }
 }
 
