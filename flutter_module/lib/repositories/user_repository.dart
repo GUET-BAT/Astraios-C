@@ -60,10 +60,10 @@ class UserRepository {
     try {
       // 构建完整URL
       print('📝 步骤1: 获取baseUrl');
-      final baseUrl = "astraios.g-oss.top/api";
+      final baseUrl = "https://astraios.g-oss.top/api";
       print('   baseUrl: $baseUrl');
       
-      final path = '/v1/register';
+      final path = '/v1/users/register';
       // 如果baseUrl没有协议，添加https://
       final fullUrl = baseUrl.startsWith('http://') || baseUrl.startsWith('https://')
           ? '$baseUrl$path'
@@ -79,7 +79,7 @@ class UserRepository {
       final res = await HttpUnit.shared.post(
         path: path,
         body: {
-          'usernaame': username,  // 按照接口要求使用 usernaame
+          'username': username,  // 按照接口要求使用 usernaame
           'password': password,
         },
       );
@@ -91,7 +91,9 @@ class UserRepository {
       print('   完整URL: $fullUrl');
       print('   返回数据: $res');
       print('═══════════════════════════════════════════════════════════');
-      
+      // if(res.isEmpty){
+      //   return res. == 0? true:false;
+      // }
       return res;
     } catch (e, stackTrace) {
       print('═══════════════════════════════════════════════════════════');
