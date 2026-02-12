@@ -88,6 +88,24 @@ class HttpUnit {
   Map<String, dynamic> _handleDioError(DioException error) {
     String errorMsg = '网络请求失败';
     
+    // 尝试从响应体中提取详细错误信息
+    if (error.response?.data != null) {
+      try {
+        final responseData = error.response!.data;
+        if (responseData is Map) {
+          // 优先使用服务器返回的错误信息
+          errorMsg = responseData['msg'] ?? 
+                     responseData['message'] ?? 
+                     responseData['error'] ?? 
+                     errorMsg;
+        } else if (responseData is String) {
+          errorMsg = responseData;
+        }
+      } catch (e) {
+        // 忽略解析错误，使用默认错误信息
+      }
+    }
+    
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
@@ -95,8 +113,10 @@ class HttpUnit {
         errorMsg = '请求超时，请检查网络连接';
         break;
       case DioExceptionType.badResponse:
-        // 服务器返回了错误状态码
-        errorMsg = '服务器错误: ${error.response?.statusCode}';
+        // 如果已经有从响应体提取的错误信息，就不覆盖
+        if (errorMsg == '网络请求失败') {
+          errorMsg = '服务器错误: ${error.response?.statusCode}';
+        }
         break;
       case DioExceptionType.cancel:
         errorMsg = '请求已取消';
@@ -111,7 +131,7 @@ class HttpUnit {
     return {
       'code': error.response?.statusCode ?? -1,
       'msg': errorMsg,
-      'data': null,
+      'data': error.response?.data, // 保留原始响应数据，便于调试
     };
   }
 }

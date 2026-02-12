@@ -18,7 +18,7 @@ class UserRepository {
     int type = 1,
   }) async {
     final res = await HttpUnit.shared.post(
-      path: '/login/',
+      path: '/v1/users/login',
       body: {
         'userName': userName,
         'passWord': passWord,
@@ -58,16 +58,14 @@ class UserRepository {
     print('═══════════════════════════════════════════════════════════');
     
     try {
-      // 构建完整URL
+      // 构建完整URL - 使用HttpUnit的实际baseUrl
       print('📝 步骤1: 获取baseUrl');
-      final baseUrl = "astraios.g-oss.top/api";
+      final baseUrl = HttpUnit.shared.dio.options.baseUrl;
       print('   baseUrl: $baseUrl');
       
-      final path = '/v1/register';
-      // 如果baseUrl没有协议，添加https://
-      final fullUrl = baseUrl.startsWith('http://') || baseUrl.startsWith('https://')
-          ? '$baseUrl$path'
-          : 'https://$baseUrl$path';
+      final path = '/v1/users/register';
+      // baseUrl已经包含协议，直接拼接
+      final fullUrl = '$baseUrl$path';
       
       print('═══════════════════════════════════════════════════════════');
       print('🌐 注册请求完整URL: $fullUrl');
@@ -79,7 +77,7 @@ class UserRepository {
       final res = await HttpUnit.shared.post(
         path: path,
         body: {
-          'usernaame': username,  // 按照接口要求使用 usernaame
+          'username': username,  // 按照接口要求使用 usernaame
           'password': password,
         },
       );
